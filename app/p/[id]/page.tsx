@@ -66,40 +66,75 @@ export default async function PasteViewPage({ params }: PageProps) {
       .replace(/'/g, "&#x27;");
 
     return (
-      <div
-        style={{
-          fontFamily: "system-ui, -apple-system, sans-serif",
-          maxWidth: "800px",
-          margin: "0 auto",
-          padding: "20px",
-        }}
-      >
-        <h1>Paste</h1>
-        <pre
-          style={{
-            backgroundColor: "#f5f5f5",
-            padding: "15px",
-            borderRadius: "4px",
-            overflow: "auto",
-            border: "1px solid #ddd",
-          }}
-        >
-          {escapedContent}
-        </pre>
-        {paste.maxViews && (
-          <p>
-            <small>
-              Views remaining: {Math.max(0, paste.maxViews - (paste.viewCount + 1))}
-            </small>
-          </p>
-        )}
-        {paste.expiresAt && (
-          <p>
-            <small>
-              Expires: {new Date(paste.expiresAt).toLocaleString()}
-            </small>
-          </p>
-        )}
+      <div style={{ minHeight: "100vh", padding: "40px 20px" }}>
+        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: "40px" }}>
+            <h1 style={{
+              fontSize: "36px",
+              fontWeight: "700",
+              color: "white",
+              marginBottom: "8px",
+            }}>Pastebin Lite</h1>
+            <a href="/" style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "14px", textDecoration: "underline" }}>
+              Create your own paste
+            </a>
+          </div>
+
+          {/* Content Card */}
+          <div style={{
+            backgroundColor: "white",
+            borderRadius: "16px",
+            padding: "40px",
+            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+              <h2 style={{ fontSize: "20px", fontWeight: "600", color: "#1a1a1a", margin: 0 }}>
+                📄 Paste Content
+              </h2>
+              <div style={{ display: "flex", gap: "12px", fontSize: "13px", color: "#6b7280" }}>
+                {paste.maxViews && (
+                  <span style={{
+                    padding: "6px 12px",
+                    backgroundColor: "#fef3c7",
+                    color: "#92400e",
+                    borderRadius: "8px",
+                    fontWeight: "500",
+                  }}>
+                    👁️ {Math.max(0, paste.maxViews - (paste.viewCount + 1))} views left
+                  </span>
+                )}
+                {paste.expiresAt && (
+                  <span style={{
+                    padding: "6px 12px",
+                    backgroundColor: "#dbeafe",
+                    color: "#1e40af",
+                    borderRadius: "8px",
+                    fontWeight: "500",
+                  }}>
+                    ⏱️ Expires: {new Date(paste.expiresAt).toLocaleString()}
+                  </span>
+                )}
+              </div>
+            </div>
+            <pre
+              style={{
+                backgroundColor: "#1e1e1e",
+                color: "#d4d4d4",
+                padding: "24px",
+                borderRadius: "12px",
+                overflow: "auto",
+                border: "none",
+                fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
+                fontSize: "14px",
+                lineHeight: "1.6",
+                maxHeight: "600px",
+              }}
+            >
+              {escapedContent}
+            </pre>
+          </div>
+        </div>
       </div>
     );
   } catch (error) {
