@@ -1,19 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const router = useRouter();
   const [content, setContent] = useState("");
   const [ttlSeconds, setTtlSeconds] = useState<string>("");
   const [maxViews, setMaxViews] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [createdUrl, setCreatedUrl] = useState<string>("");
+  const [copied, setCopied] = useState(false);
 
   const handleCreatePaste = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setCreatedUrl("");
     setLoading(true);
 
     try {
@@ -39,12 +40,30 @@ export default function Home() {
       }
 
       const data = await response.json();
-      router.push(`/p/${data.id}`);
+      setCreatedUrl(data.url);
+      setContent("");
+      setTtlSeconds("");
+      setMaxViews("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(createdUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  const handleCreateAnother = () => {
+    setCreatedUrl("");
+    setCopied(false);
   };
 
   return (
@@ -67,6 +86,98 @@ export default function Home() {
           padding: "40px",
           boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
         }}>
+          {createdUrl ? (
+            /* Success State - Show URL with Copy Button */
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "4rem", marginBottom: "20px" }}>🎉</div>
+              <h2 style={{ fontSize: "1.8rem", fontWeight: "700", color: "#1f2937", marginBottom: "10px" }}>
+                Paste Created!
+              </h2>
+              <p style={{ color: "#6b7280", marginBottom: "24px" }}>
+                Your paste is ready. Copy the link below to share it.
+              </p>
+              
+              {/* URL Display */}
+              <div style={{
+                display: "flex",
+                gap: "10px",
+                marginBottom: "24px",
+                flexWrap: "wrap",
+                justifyContent: "center",
+              }}>
+                <input
+                  type="text"
+                  value={createdUrl}
+                  readOnly
+                  style={{
+                    flex: "1",
+                    minWidth: "250px",
+                    padding: "14px 16px",
+                    border: "2px solid #e5e7eb",
+                    borderRadius: "10px",
+                    fontSize: "14px",
+                    fontFamily: "'Fira Code', monospace",
+                    backgroundColor: "#f9fafb",
+                    color: "#374151",
+                  }}
+                />
+                <button
+                  onClick={handleCopyUrl}
+                  style={{
+                    padding: "14px 24px",
+                    background: copied 
+                      ? "linear-gradient(135deg, #10b981 0%, #059669 100%)" 
+                      : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "10px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 15px rgba(102, 126, 234, 0.3)",
+                    transition: "all 0.2s ease",
+                    minWidth: "120px",
+                  }}
+                >
+                  {copied ? "✓ Copied!" : "📋 Copy URL"}
+                </button>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+                <a
+                  href={createdUrl}
+                  style={{
+                    padding: "12px 24px",
+                    backgroundColor: "#f3f4f6",
+                    color: "#374151",
+                    textDecoration: "none",
+                    borderRadius: "10px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    border: "2px solid #e5e7eb",
+                  }}
+                >
+                  👁️ View Paste
+                </a>
+                <button
+                  onClick={handleCreateAnother}
+                  style={{
+                    padding: "12px 24px",
+                    backgroundColor: "#f3f4f6",
+                    color: "#374151",
+                    border: "2px solid #e5e7eb",
+                    borderRadius: "10px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                >
+                  ➕ Create Another
+                </button>
+              </div>
+            </div>
+          ) : (
           <form onSubmit={handleCreatePaste}>
             <div style={{ marginBottom: "24px" }}>
               <label htmlFor="content" style={{ display: "block", marginBottom: "10px", fontWeight: "600", fontSize: "0.95rem", color: "#374151" }}>
@@ -188,7 +299,6 @@ export default function Home() {
             >
               {loading ? "Creating..." : "🚀 Create Paste"}
             </button>
-          </form>
 
           <div style={{ marginTop: "24px", padding: "16px", backgroundColor: "#f9fafb", borderRadius: "10px", fontSize: "0.85rem", color: "#6b7280" }}>
             <p style={{ marginBottom: "8px" }}><strong>💡 Tips:</strong></p>
@@ -198,6 +308,8 @@ export default function Home() {
               <li>Leave both blank for permanent pastes</li>
             </ul>
           </div>
+          </form>
+          )}
         </div>
 
         {/* Footer */}
