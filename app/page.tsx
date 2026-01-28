@@ -9,7 +9,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [createdUrl, setCreatedUrl] = useState<string>("");
+  const [createdContent, setCreatedContent] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [copiedContent, setCopiedContent] = useState(false);
 
   const handleCreatePaste = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +43,7 @@ export default function Home() {
 
       const data = await response.json();
       setCreatedUrl(data.url);
+      setCreatedContent(content);
       setContent("");
       setTtlSeconds("");
       setMaxViews("");
@@ -61,9 +64,21 @@ export default function Home() {
     }
   };
 
+  const handleCopyContent = async () => {
+    try {
+      await navigator.clipboard.writeText(createdContent);
+      setCopiedContent(true);
+      setTimeout(() => setCopiedContent(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
   const handleCreateAnother = () => {
     setCreatedUrl("");
+    setCreatedContent("");
     setCopied(false);
+    setCopiedContent(false);
   };
 
   return (
@@ -141,6 +156,45 @@ export default function Home() {
                 >
                   {copied ? "✓ Copied!" : "📋 Copy URL"}
                 </button>
+              </div>
+
+              {/* Content Display */}
+              <div style={{ marginBottom: "24px", textAlign: "left" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                  <label style={{ fontWeight: "600", fontSize: "0.9rem", color: "#374151" }}>
+                    📝 Your Content
+                  </label>
+                  <button
+                    onClick={handleCopyContent}
+                    style={{
+                      padding: "8px 16px",
+                      background: copiedContent 
+                        ? "linear-gradient(135deg, #10b981 0%, #059669 100%)" 
+                        : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {copiedContent ? "✓ Copied!" : "📋 Copy Content"}
+                  </button>
+                </div>
+                <pre style={{
+                  padding: "16px",
+                  backgroundColor: "#1f2937",
+                  color: "#e5e7eb",
+                  borderRadius: "10px",
+                  fontSize: "13px",
+                  fontFamily: "'Fira Code', 'Courier New', monospace",
+                  overflow: "auto",
+                  maxHeight: "200px",
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                  margin: 0,
+                }}>{createdContent}</pre>
               </div>
 
               {/* Action Buttons */}
